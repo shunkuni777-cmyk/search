@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Private Portal</title>
+    <style>
+        /* 1. 全体の配色（深みのあるダークネイビー） */
+        :root {
+            --bg-color: #0b132b;       /* 宇宙のような深い紺 */
+            --card-color: #1c2541;     /* カードや入力欄の紺 */
+            --accent-color: #00b4d8;   /* さわやかな水色 */
+            --accent-hover: #90e0ef;   /* ホバー時の明るい水色 */
+            --text-color: #f1faee;     /* メインテキスト */
+            --text-muted: #a5a5a5;     /* 薄いテキスト */
+            --danger-color: #e63946;   /* 警告・削除の赤 */
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            width: 100%;
+            max-width: 550px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 26px;
+            margin-bottom: 5px;
+            color: var(--accent-color);
+            letter-spacing: 1px;
+        }
+        .subtitle {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-bottom: 25px;
+        }
+
+        /* 検索フォーム */
+        input[type="text"] {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            border: 2px solid #3a506b;
+            border-radius: 12px;
+            background-color: var(--card-color);
+            color: #fff;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: var(--accent-color);
+        }
+
+        /* 検索フィルターボタン */
+        .filter-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background-color: #3a506b;
+            color: var(--text-color);
+            border: none;
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .filter-btn:hover {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+        }
+
+        /* 検索ボタン */
+        .search-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            transition: background 0.2s;
+            margin-bottom: 30px;
+        }
+        .search-btn:hover {
+            background-color: var(--accent-hover);
+        }
+
+        /* クイックリンク（ブックマーク） */
+        .quick-links {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .link-item {
+            background-color: var(--card-color);
+            border: 1px solid #3a506b;
+            padding: 10px 15px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .link-item:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        /* 履歴・お気に入りエリア */
+        .history-section {
+            text-align: left;
+            background: var(--card-color);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #3a506b;
+        }
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #3a506b;
+            padding-bottom: 10px;
+        }
+        .history-header h2 {
+            font-size: 15px;
+            margin: 0;
+            color: var(--accent-color);
+        }
+        .clear-all-btn {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            cursor: pointer;
+            font-size: 12px;
+            padding: 0;
+        }
+        .clear-all-btn:hover {
+            text-decoration: underline;
+        }
+        .history-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #2c3e50;
+        }
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        .history-text {
+            cursor: pointer;
+            flex-grow: 1;
+            font-size: 14px;
+            color: #ddd;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .history-text:hover {
+            color: var(--accent-color);
+        }
+        
+        /* ピン留め・削除ボタン */
+        .action-btns {
+            display: flex;
+            gap: 12px;
+        }
+        .pin-btn, .delete-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0;
+            color: #5a6e7f;
+            transition: color 0.1s;
+        }
+        .pin-btn.pinned {
+            color: #ffb703; /* ゴールドの星 */
+        }
+        .delete-btn:hover {
+            color: var(--danger-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Private Portal 🔒</h1>
+        <div class="subtitle">Google Search Hub</div>
+        
+        <input type="text" id="search-query" placeholder="検索ワードを入力..." autocomplete="off">
+        
+        <div class="filter-group">
+            <span style="font-size:11px; color:var(--text-muted); align-self:center; margin-right:5px;">フィルター:</span>
+            <button class="filter-btn" onclick="addFilter('after:2025')">1年以内</button>
+            <button class="filter-btn" onclick="addFilter('lr=lang_ja')">日本語のみ</button>
+            <button class="filter-btn" onclick="addFilter('filetype:pdf')">PDF限定</button>
+            <button class="filter-btn" onclick="addFilter('site:github.com')">GitHub内</button>
+        </div>
+
+        <button class="search-btn" onclick="executeSearch()">Google 検索</button>
+
+        <div class="quick-links">
+            <a href="https://youtube.com" target="_blank" class="link-item">YouTube</a>
+            <a href="https://news.google.com" target="_blank" class="link-item">Googleニュース</a>
+            <a href="https://jp.spankbang.com" target="_blank" class="link-item">spankbang</a>
+            <a href="https://notion.so" target="_blank" class="link-item">Notion</a>
+            
+        </div>
+
+        <div class="history-section">
+            <div class="history-header">
+                <h2>検索履歴 ＆ お気に入り</h2>
+                <button class="clear-all-btn" onclick="clearAllHistory()">通常履歴をすべて消去</button>
+            </div>
+            <ul id="history-list" class="history-list">
+                </ul>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', displayHistory);
+
+        // フィルターボタンを押した時の処理
+        function addFilter(filterText) {
+            const queryInput = document.getElementById('search-query');
+            let currentVal = queryInput.value.trim();
+            
+            if (filterText === 'lr=lang_ja') {
+                // 「日本語のみ」はGoogleのURLパラメータとして処理するため、フラグとして末尾に付与（検索実行時に処理）
+                if (!currentVal.includes('[JA]')) {
+                    queryInput.value = currentVal ? `${currentVal} [JA]` : '[JA]';
+                }
+            } else {
+                // 通常の検索用コマンドはテキストにそのまま追加
+                if (!currentVal.includes(filterText)) {
+                    queryInput.value = currentVal ? `${currentVal} ${filterText}` : filterText;
+                }
+            }
+            queryInput.focus();
+        }
+
+        function executeSearch() {
+            const queryInput = document.getElementById('search-query');
+            let query = queryInput.value.trim();
+            if (!query) {
+                alert('検索ワードを入力してください');
+                return;
+            }
+
+            // [JA]（日本語のみ）フィルタが指定されているかチェック
+            let isJapaneseOnly = false;
+            if (query.includes('[JA]')) {
+                isJapaneseOnly = true;
+                query = query.replace('[JA]', '').trim();
+            }
+
+            // 1. 履歴を保存（フィルター用の特殊表記は除いて保存）
+            saveHistory(query);
+
+            // 2. Googleの検索URLを作成
+            const encodedQuery = encodeURIComponent(query);
+            let targetUrl = `https://www.google.com/search?q=${encodedQuery}`;
+            
+            if (isJapaneseOnly) {
+                targetUrl += '&lr=lang_ja';
+            }
+
+            // 3. 新しいタブで検索結果を開く
+            window.open(targetUrl, '_blank');
+            
+            // 4. 入力欄をクリアして履歴を再描画
+            queryInput.value = '';
+            displayHistory();
+        }
+
+        // 保存ロジック（お気に入り/通常の判別）
+        function saveHistory(query) {
+            let historyObj = JSON.parse(localStorage.getItem('myPrivateSearchObj')) || { pinned: [], regular: [] };
+            
+            // すでにピン留めされている場合は通常の履歴には追加しない
+            if (historyObj.pinned.includes(query)) return;
+
+            // 通常履歴の重複排除と先頭追加
+            historyObj.regular = historyObj.regular.filter(item => item !== query);
+            historyObj.regular.unshift(query);
+            
+            // 通常履歴は最大30件まで
+            if (historyObj.regular.length > 30) {
+                historyObj.regular.pop();
+            }
+            localStorage.setItem('myPrivateSearchObj', JSON.stringify(historyObj));
+        }
+
+        // 履歴＆お気に入りの描画
+        function displayHistory() {
+            const historyList = document.getElementById('history-list');
+            const historyObj = JSON.parse(localStorage.getItem('myPrivateSearchObj')) || { pinned: [], regular: [] };
+            
+            const hasPinned = historyObj.pinned.length > 0;
+            const hasRegular = historyObj.regular.length > 0;
+
+            if (!hasPinned && !hasRegular) {
+                historyList.innerHTML = '<li style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 15px 0;">履歴やピン留めはありません</li>';
+                return;
+            }
+
+            let htmlContent = '';
+
+            // ピン留めされたアイテムを表示
+            historyObj.pinned.forEach((item) => {
+                htmlContent += `
+                    <li class="history-item" style="border-left: 3px solid #ffb703; padding-left: 8px;">
+                        <span class="history-text" onclick="searchWithHistory('${item.replace(/'/g, "\\'")}')">📌 ${escapeHtml(item)}</span>
+                        <div class="action-btns">
+                            <button class="pin-btn pinned" onclick="togglePin('${item.replace(/'/g, "\\'")}')" title="ピン留めを解除">★</button>
+                            <button class="delete-btn" onclick="deleteItem('${item.replace(/'/g, "\\'")}', true)">×</button>
+                        </div>
+                    </li>
+                `;
+            });
+
+            // 通常履歴を表示
+            historyObj.regular.forEach((item) => {
+                htmlContent += `
+                    <li class="history-item">
+                        <span class="history-text" onclick="searchWithHistory('${item.replace(/'/g, "\\'")}')">${escapeHtml(item)}</span>
+                        <div class="action-btns">
+                            <button class="pin-btn" onclick="togglePin('${item.replace(/'/g, "\\'")}')" title="ピン留めする">☆</button>
+                            <button class="delete-btn" onclick="deleteItem('${item.replace(/'/g, "\\'")}', false)">×</button>
+                        </div>
+                    </li>
+                `;
+            });
+
+            historyList.innerHTML = htmlContent;
+        }
+
+        // ピン留めのON/OFF切り替え
+        function togglePin(word) {
+            let historyObj = JSON.parse(localStorage.getItem('myPrivateSearchObj')) || { pinned: [], regular: [] };
+            
+            if (historyObj.pinned.includes(word)) {
+                // ピン解除 -> 通常履歴の先頭に戻す
+                historyObj.pinned = historyObj.pinned.filter(item => item !== word);
+                historyObj.regular.unshift(word);
+            } else {
+                // ピン登録 -> 通常履歴から消してピンに追加
+                historyObj.regular = historyObj.regular.filter(item => item !== word);
+                historyObj.pinned.push(word);
+            }
+            
+            localStorage.setItem('myPrivateSearchObj', JSON.stringify(historyObj));
+            displayHistory();
+        }
+
+        // 個別削除
+        function deleteItem(word, isPinned) {
+            let historyObj = JSON.parse(localStorage.getItem('myPrivateSearchObj')) || { pinned: [], regular: [] };
+            
+            if (isPinned) {
+                historyObj.pinned = historyObj.pinned.filter(item => item !== word);
+            } else {
+                historyObj.regular = historyObj.regular.filter(item => item !== word);
+            }
+            
+            localStorage.setItem('myPrivateSearchObj', JSON.stringify(historyObj));
+            displayHistory();
+        }
+
+        // 履歴リストクリックでの検索
+        function searchWithHistory(word) {
+            document.getElementById('search-query').value = word;
+            executeSearch();
+        }
+
+        // 通常の履歴だけを一括削除（ピン留めは保護）
+        function clearAllHistory() {
+            if (confirm('ピン留め以外の「通常の検索履歴」をすべて削除しますか？')) {
+                let historyObj = JSON.parse(localStorage.getItem('myPrivateSearchObj')) || { pinned: [], regular: [] };
+                historyObj.regular = [];
+                localStorage.setItem('myPrivateSearchObj', JSON.stringify(historyObj));
+                displayHistory();
+            }
+        }
+
+        // セキュリティ用エスケープ
+        function escapeHtml(str) {
+            return str.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#039;');
+        }
+
+        // Enterキーで検索
+        document.getElementById('search-query').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                executeSearch();
+            }
+        });
+    </script>
+</body>
+</html>
